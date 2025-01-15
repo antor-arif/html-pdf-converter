@@ -40,7 +40,7 @@ Below is a simple example of how to use the package:
 
 ### Basic Example
 ```javascript
-const HTMLToPDF = require("html-pdf-converter");
+const HTMLToPDF = require("@antor-arif/html-pdf-converter");
 
 (async () => {
     const htmlToPdf = new HTMLToPDF(); // Instantiate the class
@@ -88,7 +88,7 @@ Converts an HTML string into a PDF file.
 
 #### Example with Custom Options:
 ```javascript
-const HTMLToPDF = require("html-pdf-converter");
+const HTMLToPDF = require("@antor-arif/html-pdf-converter");
 
 (async () => {
     const htmlToPdf = new HTMLToPDF();
@@ -125,7 +125,7 @@ const HTMLToPDF = require("html-pdf-converter");
 ### External Browser Endpoint
 You can connect to an existing Puppeteer browser instance using the `browserWSEndpoint` option:
 ```javascript
-const HTMLToPDF = require("html-pdf-converter");
+const HTMLToPDF = require("@antor-arif/html-pdf-converter");
 
 (async () => {
     const htmlToPdf = new HTMLToPDF();
