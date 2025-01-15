@@ -95,7 +95,8 @@ const htmlToPdf = require("./index");
     const outputPath = "test-output-2.pdf";
 
     try {
-        const pdfPath = await htmlToPdf(html, outputPath);
+        const pdfGenerator = new htmlToPdf();
+        const pdfPath = await pdfGenerator.generatePDF(html, outputPath);
         console.log(`PDF successfully created at: ${pdfPath}`);
     } catch (error) {
         console.error("Error generating PDF:", error);

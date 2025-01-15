@@ -1,65 +1,124 @@
 const puppeteer = require("puppeteer");
 const path = require("path");
 
-/**
- * Converts HTML content to a PDF file.
- * @param {string} html - The HTML content to convert.
- * @param {string} outputPath - The file path where the PDF will be saved.
- * @param {object} options - Puppeteer PDF options (optional).
- * @returns {Promise<string>} - The path to the generated PDF file.
- */
-async function htmlToPdf(html, outputPath, options = {}) {
-    if (!html || typeof html !== "string") {
-        throw new Error("The 'html' parameter must be a valid non-empty string.");
+class HTMLToPDF {
+    constructor() {
+        this.browser = null;
+        this.defaultArgs = ["--no-sandbox", "--disable-setuid-sandbox"];
+        this.autoCloseBrowser = true;
     }
 
-    if (!outputPath || typeof outputPath !== "string") {
-        throw new Error("The 'outputPath' parameter must be a valid string.");
+    async initializeBrowser(options = {}) {
+        if (!this.browser) {
+            const args = options.args || this.defaultArgs;
+            const headless = options.headless !== undefined ? options.headless : true;
+
+            this.browser = await puppeteer.launch({
+                headless,
+                args,
+                executablePath: options.executablePath,
+            });
+
+            this.browser.on("disconnected", () => {
+                this.browser = null;
+            });
+
+            this.browser.on("error", (error) => {
+                console.error("Browser error:", error);
+            });
+        }
     }
 
-    const absoluteOutputPath = path.isAbsolute(outputPath)
-        ? outputPath
-        : path.resolve(outputPath);
+    async closeBrowserIfNeeded() {
+        if (this.autoCloseBrowser && this.browser) {
+            await this.browser.close();
+            this.browser = null;
+        }
+    }
 
-    const browser = await puppeteer.launch({
-        headless: true,
-        args: [
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-accelerated-2d-canvas",
-            "--disable-gpu",
-        ],
-    });
-    const page = await browser.newPage();
+    setAutoCloseBrowser(flag) {
+        this.autoCloseBrowser = flag;
+    }
 
-    try {
+    async generatePDF(html, outputPath, options = {}) {
+        if (!html || typeof html !== "string") {
+            throw new Error("The 'html' parameter must be a valid non-empty string.");
+        }
 
-        await page.setDefaultNavigationTimeout(60000);
-        await page.setDefaultTimeout(60000);
+        if (!outputPath || typeof outputPath !== "string") {
+            throw new Error("The 'outputPath' parameter must be a valid string.");
+        }
 
+        // Ensure outputPath is absolute
+        const absoluteOutputPath = path.isAbsolute(outputPath)
+            ? outputPath
+            : path.resolve(outputPath);
 
-        console.log("HTML content length:", html.length);
+        await this.initializeBrowser(options);
 
+        const page = await this.browser.newPage();
 
-        await page.setContent(html, { waitUntil: "domcontentloaded" });
+        // Set custom timeouts
+        if (options.timeout) {
+            page.setDefaultTimeout(options.timeout);
+            page.setDefaultNavigationTimeout(options.timeout);
+        }
 
+        // Set custom headers
+        if (options.headers) {
+            await page.setExtraHTTPHeaders(options.headers);
+        }
 
-        await page.pdf({
-            path: absoluteOutputPath,
-            format: "A4",
-            printBackground: true,
-            ...options,
-        });
+        try {
+            if (this.isUrl(html)) {
+                // Navigate to the URL
+                await page.goto(html, {
+                    waitUntil: options.waitUntil || "networkidle0",
+                    timeout: options.timeout || 30000,
+                });
+            } else {
+                // Set content as HTML
+                await page.setContent(html, {
+                    waitUntil: options.waitUntil || "domcontentloaded",
+                    timeout: options.timeout || 30000,
+                });
+            }
 
-        console.log(`PDF successfully generated at: ${absoluteOutputPath}`);
-        return absoluteOutputPath;
-    } catch (error) {
-        console.error("Error generating PDF:", error);
-        throw error;
-    } finally {
-        await browser.close();
+            // Generate PDF
+            const pdfOptions = {
+                path: absoluteOutputPath,
+                printBackground: options.printBackground !== undefined ? options.printBackground : true,
+                format: options.format || "A4",
+                margin: options.margin || {},
+                ...options.pdfOptions,
+            };
+
+            await page.pdf(pdfOptions);
+            return absoluteOutputPath;
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+            throw error;
+        } finally {
+            await page.close();
+            await this.closeBrowserIfNeeded();
+        }
+    }
+
+    isUrl(string) {
+        try {
+            new URL(string);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    async closeBrowser() {
+        if (this.browser) {
+            await this.browser.close();
+            this.browser = null;
+        }
     }
 }
 
-module.exports = htmlToPdf;
+module.exports = HTMLToPDF;

@@ -4,7 +4,7 @@ A Node.js package to convert HTML to PDF using Puppeteer.
 
 ## Requirements
 - Node.js >= 16
-- Puppeteer v10.4.0 (Chromium 92)
+- Puppeteer >= v10.4.0
 
 # html-pdf-converter
 
@@ -14,15 +14,16 @@ A Node.js package to convert HTML to PDF using Puppeteer.
 
 ## Features
 - Converts HTML strings into PDF files.
-- Supports Puppeteer v10.4.0 for reliable and stable performance.
+- Supports Puppeteer for reliable and stable performance.
 - Compatible with Node.js 16 or higher.
 - Fully customizable PDF options (e.g., page size, margins, background printing).
+- Advanced configuration for Puppeteer instance (e.g., custom headers, authentication, or external browser endpoint).
 
 ---
 
 ## Requirements
 - **Node.js**: v16 or higher.
-- **Puppeteer**: v10.4.0 (included in dependencies).
+- **Puppeteer**: v10.4.0 or higher (included in dependencies).
 
 ---
 
@@ -39,10 +40,12 @@ Below is a simple example of how to use the package:
 
 ### Basic Example
 ```javascript
-const htmlToPdf = require("html-pdf-converter");
+const HTMLToPDF = require("html-pdf-converter");
 
 (async () => {
-  const html = `
+    const htmlToPdf = new HTMLToPDF(); // Instantiate the class
+
+    const html = `
     <html>
       <head>
         <title>PDF Test</title>
@@ -54,14 +57,16 @@ const htmlToPdf = require("html-pdf-converter");
     </html>
   `;
 
-  const outputPath = "output.pdf";
+    const outputPath = "output.pdf";
 
-  try {
-    const pdfPath = await htmlToPdf(html, outputPath);
-    console.log(`PDF successfully created at: ${pdfPath}`);
-  } catch (error) {
-    console.error("Error generating PDF:", error);
-  }
+    try {
+        const pdfPath = await htmlToPdf.create(html, outputPath);
+        console.log(`PDF successfully created at: ${pdfPath}`);
+    } catch (error) {
+        console.error("Error generating PDF:", error);
+    } finally {
+        await htmlToPdf.closeBrowser();
+    }
 })();
 ```
 
@@ -69,7 +74,7 @@ const htmlToPdf = require("html-pdf-converter");
 
 ## API Reference
 
-### `htmlToPdf(html, outputPath, options)`
+### `create(html, outputPath, options)`
 
 Converts an HTML string into a PDF file.
 
@@ -83,29 +88,61 @@ Converts an HTML string into a PDF file.
 
 #### Example with Custom Options:
 ```javascript
-const htmlToPdf = require("html-pdf-converter");
+const HTMLToPDF = require("html-pdf-converter");
 
 (async () => {
-  const html = "<h1>Custom PDF</h1><p>This PDF has custom settings.</p>";
-  const outputPath = "custom-output.pdf";
+    const htmlToPdf = new HTMLToPDF();
 
-  const options = {
-    format: "Letter",
-    margin: {
-      top: "1in",
-      bottom: "1in",
-      left: "1in",
-      right: "1in",
-    },
-    printBackground: true,
-  };
+    const html = "<h1>Custom PDF</h1><p>This PDF has custom settings.</p>";
+    const outputPath = "custom-output.pdf";
 
-  try {
-    const pdfPath = await htmlToPdf(html, outputPath, options);
-    console.log(`Custom PDF created at: ${pdfPath}`);
-  } catch (error) {
-    console.error("Error generating custom PDF:", error);
-  }
+    const options = {
+        format: "Letter",
+        margin: {
+            top: "1in",
+            bottom: "1in",
+            left: "1in",
+            right: "1in",
+        },
+        printBackground: true,
+    };
+
+    try {
+        const pdfPath = await htmlToPdf.generatePDF(html, outputPath, options);
+        console.log(`Custom PDF created at: ${pdfPath}`);
+    } catch (error) {
+        console.error("Error generating custom PDF:", error);
+    } finally {
+        await htmlToPdf.closeBrowser();
+    }
+})();
+```
+
+---
+
+## Advanced Features
+
+### External Browser Endpoint
+You can connect to an existing Puppeteer browser instance using the `browserWSEndpoint` option:
+```javascript
+const HTMLToPDF = require("html-pdf-converter");
+
+(async () => {
+    const htmlToPdf = new HTMLToPDF();
+
+    await htmlToPdf.setOptions({
+        browserWSEndpoint: "ws://localhost:3000",
+    });
+
+    const html = "<h1>PDF from External Browser</h1>";
+    const outputPath = "external-browser-output.pdf";
+
+    try {
+        const pdfPath = await htmlToPdf.generatePDF(html, outputPath);
+        console.log(`PDF created using external browser at: ${pdfPath}`);
+    } catch (error) {
+        console.error("Error generating PDF with external browser:", error);
+    }
 })();
 ```
 
@@ -117,7 +154,7 @@ This package is licensed under the MIT License. See the LICENSE file for more de
 ---
 
 ## Author
-Arifur Rahman 
+Arifur Rahman
 
 ---
 
@@ -131,6 +168,7 @@ If you encounter issues:
 1. Ensure that Puppeteer is correctly installed.
 2. Check for Node.js version compatibility (Node.js 16 or higher).
 3. Verify that your HTML content is valid.
+4. Ensure Puppeteer dependencies (like Chromium) are accessible in production environments (e.g., Docker or CI/CD pipelines).
 
 For additional help, consult the Puppeteer [Troubleshooting Guide](https://pptr.dev/troubleshooting).
 
@@ -138,5 +176,3 @@ For additional help, consult the Puppeteer [Troubleshooting Guide](https://pptr.
 
 ## Feedback
 We'd love to hear your thoughts! Submit feedback or questions by opening an issue on the repository.
-
-
