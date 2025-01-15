@@ -1,12 +1,21 @@
 {
-  "name": "html-pdf-converter",
-  "version": "1.0.0",
+  "name": "@antor-arif/html-pdf-converter",
+  "version": "1.0.1",
   "description": "A Node.js package to convert HTML to PDF using Puppeteer.",
   "main": "index.js",
   "author": {
     "name": "Arifur Rahman",
     "email": "arifurrahman.ar10@yahoo.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antor-arif/html-pdf-converter.git"
+  },
+  "keywords": ["html", "pdf", "puppeteer", "convert"],
+  "bugs": {
+    "url": "https://github.com/antor-arif/html-pdf-converter/issues"
+  },
+  "homepage": "https://github.com/antor-arif/html-pdf-converter#readme",
   "license": "MIT",
   "dependencies": {
     "puppeteer": "10.4.0"

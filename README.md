@@ -29,7 +29,7 @@ A Node.js package to convert HTML to PDF using Puppeteer.
 ## Installation
 Install the package using Yarn:
 ```bash
-yarn add html-pdf-converter
+yarn add @antor-arif/html-pdf-converter
 ```
 
 ---
