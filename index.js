@@ -17,27 +17,43 @@ async function htmlToPdf(html, outputPath, options = {}) {
         throw new Error("The 'outputPath' parameter must be a valid string.");
     }
 
-    // Ensure that the outputPath is absolute
     const absoluteOutputPath = path.isAbsolute(outputPath)
         ? outputPath
         : path.resolve(outputPath);
 
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-accelerated-2d-canvas",
+            "--disable-gpu",
+        ],
+    });
     const page = await browser.newPage();
 
     try {
-        // Set the HTML content
-        await page.setContent(html, { waitUntil: "networkidle0" });
 
-        // Generate the PDF
+        await page.setDefaultNavigationTimeout(60000);
+        await page.setDefaultTimeout(60000);
+
+
+        console.log("HTML content length:", html.length);
+
+
+        await page.setContent(html, { waitUntil: "domcontentloaded" });
+
+
         await page.pdf({
-            path: absoluteOutputPath, // Save the PDF to the resolved dynamic path
+            path: absoluteOutputPath,
             format: "A4",
             printBackground: true,
             ...options,
         });
 
-        return absoluteOutputPath; // Return the absolute path of the generated PDF
+        console.log(`PDF successfully generated at: ${absoluteOutputPath}`);
+        return absoluteOutputPath;
     } catch (error) {
         console.error("Error generating PDF:", error);
         throw error;

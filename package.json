@@ -1,6 +1,6 @@
 {
   "name": "@antor-arif/html-pdf-converter",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A Node.js package to convert HTML to PDF using Puppeteer.",
   "main": "index.js",
   "author": {
