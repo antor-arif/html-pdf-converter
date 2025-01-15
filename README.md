@@ -60,7 +60,7 @@ const HTMLToPDF = require("html-pdf-converter");
     const outputPath = "output.pdf";
 
     try {
-        const pdfPath = await htmlToPdf.create(html, outputPath);
+        const pdfPath = await htmlToPdf.generatePDF(html, outputPath);
         console.log(`PDF successfully created at: ${pdfPath}`);
     } catch (error) {
         console.error("Error generating PDF:", error);
